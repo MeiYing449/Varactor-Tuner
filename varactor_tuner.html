@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Varactor Tuner — Interactive Semiconductor Lab</title>
+<style>
+:root{--ink:#f6efd9;--muted:#b9ad91;--panel:#171814;--line:#39382c;--accent:#f2c14e;--accent2:#d9534f;--good:#62c98b;--bad:#ee8067;--gold:#f2c14e;--soft:#202c27;--pink:#e28b68;--cyan:#6fae9b}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;background:#11140f;color:var(--ink);line-height:1.45}
+main{max-width:980px;margin:auto;padding:28px 22px 56px}
+header{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;border-bottom:1px solid var(--line);padding-bottom:18px}
+h1{margin:0;font-size:30px;letter-spacing:-.02em}.sub{color:var(--muted);margin-top:5px}.badge{display:inline-block;padding:5px 9px;border-radius:99px;background:#292817;color:#f2c14e;font-size:11px;font-weight:800;letter-spacing:.05em;border:1px solid #4a4630}
+.progress{margin-top:20px}.progressTop{display:flex;justify-content:space-between;font-size:13px;color:var(--muted);margin-bottom:7px}.bar{height:8px;background:#282534;border-radius:99px;overflow:hidden}.bar>div{height:100%;width:33.33%;background:var(--accent);transition:.2s}
+.game{display:grid;grid-template-columns:1.2fr .8fr;gap:16px;margin-top:16px}.card{border:2px solid #3b4a2f;border-radius:18px;padding:20px;background:#181b14;box-shadow:0 8px 0 #090b08}.gameMain{background:#1b1e16}
+.station{font-size:13px;color:var(--muted);font-weight:750;letter-spacing:.05em}.target{font-size:42px;font-weight:900;letter-spacing:-.03em;margin:2px 0 3px}.targetHint{color:var(--muted);font-size:14px}
+.junction{margin:22px 0 14px;height:160px;display:flex;align-items:center;justify-content:center;position:relative}.junction:before{content:'voltage-controlled junction';position:absolute;top:3px;left:50%;transform:translateX(-50%);font-size:11px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase}.junction:after{content:'';position:absolute;bottom:2px;width:220px;height:8px;border-radius:50%;background:#6f8d4b22}.side{height:98px;width:125px;display:flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,.07);position:relative;z-index:1}.p{background:#7b3f3a;border-radius:18px 4px 4px 18px;color:#ffe0c7}.n{background:#355c46;border-radius:4px 18px 18px 4px;color:#d9f2c0}.region{height:98px;width:72px;background:#3b3f2d;border-top:1px dashed #8a856e;border-bottom:1px dashed #8a856e;box-shadow:inset 0 0 18px #f2c14e18;transition:.15s;display:flex;align-items:center;justify-content:center;position:relative;z-index:1}.charge{font-weight:850;text-align:center}.charge small{display:block;font-weight:500;color:var(--muted);font-size:11px}.region .charge{font-size:14px}
+
+.radioFace{position:relative;display:block;background:#6f4d2f;border:3px solid #a86f35;border-radius:14px;padding:24px 18px 14px;margin-bottom:10px;box-shadow:inset 0 -5px 0 #4a3524}.antennaStem{position:absolute;top:-27px;left:50%;width:4px;height:30px;background:#a86f35;transform:rotate(-8deg);transform-origin:bottom;border-radius:2px}.antennaTip{position:absolute;top:-33px;left:calc(50% - 6px);width:12px;height:12px;border-radius:50%;background:#b84d3c;border:2px solid #e9a94f}.dialArea{display:flex;align-items:center;justify-content:center;gap:18px;margin-top:9px;padding:10px 0 4px}.dial{width:132px;height:132px;border-radius:50%;position:relative;flex:0 0 auto;background:#3f4930;border:5px solid #73834d;box-shadow:0 5px 0 #171a12,0 8px 14px #0007;touch-action:none;cursor:grab}.dial:active{cursor:grabbing}.dialTicks{position:absolute;inset:8px;border-radius:50%;background:repeating-conic-gradient(from -135deg,#d2a44d 0deg 2deg,transparent 2deg 15deg);mask:radial-gradient(circle,transparent 0 55%,#000 56% 100%);-webkit-mask:radial-gradient(circle,transparent 0 55%,#000 56% 100%)}.dialPointer{position:absolute;left:50%;top:50%;width:5px;height:49px;border-radius:3px;background:#d04f3f;transform-origin:50% 100%}.dialPointer:after{content:'';position:absolute;top:-7px;left:-5px;width:15px;height:15px;border-radius:50%;background:#d04f3f}.dialCenter{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:38px;height:38px;border-radius:50%;background:#202419;border:2px solid #d2a44d;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:11px;color:#e9c56a}.touchDot{width:32px;height:32px;border-radius:50%;background:#d04f3f;border:4px solid #f0c66a;box-shadow:none;flex:0 0 auto}.dialReadout{min-width:130px}.dialReadout span{display:block;color:var(--muted);font-size:10px;letter-spacing:.08em}.dialReadout strong{display:block;font-size:24px;color:var(--gold)}.dialReadout small{color:var(--muted);font-size:11px}.srOnlyRange{position:absolute;opacity:0;width:1px;height:1px;pointer-events:none}.radioFace .station{color:var(--gold)}
+label{display:block;margin-top:5px}.sliderRow{display:flex;align-items:center;gap:10px}.sliderRow input{flex:1}input[type=range]{width:100%;accent-color:var(--accent);height:40px}.vrNow{font-weight:900;font-size:18px;min-width:70px;text-align:right}.labels{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:-2px}
+.readouts{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:15px}.readout{background:#202219;border:1px solid #39382c;border-radius:13px;padding:11px}.readout b{display:block;font-size:18px}.readout span{font-size:11px;color:var(--muted)}
+.freqBox{text-align:center;margin-top:17px;padding:14px;border:2px solid #3b4a2f;border-radius:14px;background:#20251a}.freqBox .small{font-size:12px;color:var(--muted)}.freq{font-size:40px;font-weight:950;letter-spacing:-.03em}.status{font-weight:800;margin-top:2px;min-height:22px}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:13px}button{border:0;border-radius:11px;padding:11px 15px;font-weight:800;cursor:pointer;background:var(--accent);color:#fff}button.secondary{background:#2b2738;color:var(--ink)}
+.sidePanel h2{font-size:18px;margin:0 0 8px}.sidePanel p{font-size:14px;color:var(--muted);margin:0 0 15px}.targetCard{background:#20251a;border:1px solid #465437;border-radius:13px;padding:13px;margin-bottom:10px}.targetCard b{display:block}.targetCard span{font-size:12px;color:var(--muted)}
+.section{margin-top:28px}.sectionHead{display:flex;justify-content:space-between;align-items:end;gap:15px;margin-bottom:12px}.section h2{font-size:23px;margin:0}.sectionLead{color:var(--muted);font-size:14px;margin:3px 0 0}.formulaGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.formula{border:1px solid var(--line);border-radius:15px;padding:15px;background:#171914}.formulaTitle{font-size:12px;color:var(--muted);font-weight:800;letter-spacing:.04em;text-transform:uppercase}.eq{font-family:Georgia,'Times New Roman',serif;font-size:21px;margin:7px 0 5px;line-height:1.6}.live{color:var(--accent);font-weight:800;white-space:nowrap}.trend{display:inline-flex;align-items:center;justify-content:center;min-width:25px;height:25px;margin-left:5px;border-radius:8px;background:#283521;color:var(--accent);font-family:Inter,system-ui,sans-serif;font-size:18px;font-weight:900;vertical-align:middle}.trend.down{color:var(--pink)}.meaning{font-size:12px;color:var(--muted)}
+.chain{display:none}
+.knowledge{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.knowledge article{padding:14px 12px;border:1px solid #35473f;border-top:4px solid #4f9b73;background:#18211d;border-radius:10px}.knowledge article:nth-child(2){border-top-color:#c9534d;background:#241a19}.knowledge article:nth-child(3){border-top-color:#6eaa62;background:#1a241d}.knowledge h3{font-size:15px;margin:0 0 5px}.knowledge p{font-size:13px;color:var(--muted);margin:0}.note{background:#24271b;border-left:4px solid var(--accent);padding:13px 15px;border-radius:8px;font-size:13px;margin-top:12px}.foot{margin-top:24px;color:var(--muted);font-size:11px;text-align:center}
+#overlay{position:fixed;inset:0;background:rgba(11,10,17,.97);display:flex;align-items:center;justify-content:center;padding:20px;z-index:10}.modal{max-width:590px;text-align:center}.modal h2{font-size:40px;margin:9px 0}.modal p{color:var(--muted);line-height:1.55}.score{font-size:25px;font-weight:900;margin:14px}
+@media(max-width:760px){main{padding:18px 14px 42px}.game{grid-template-columns:1fr}.formulaGrid{grid-template-columns:1fr}.knowledge{grid-template-columns:1fr}.chain{grid-template-columns:1fr 1fr}.target{font-size:34px}.side{width:95px}.region{width:58px}}
+</style>
+</head>
+<body>
+<div id="overlay"><div class="modal">
+  <span class="badge">INTERACTIVE SEMICONDUCTOR LAB</span>
+  <h2>📻 Varactor Tuner</h2>
+  <p>Can you tune three radio stations using <b>one voltage-controlled capacitor</b>? Turn the knob and watch the depletion region, capacitance, and resonant frequency change together.</p>
+  <p><b>Try to predict the direction before moving the slider:</b><br>V<sub>R</sub> ↑ → W ↑ → C<sub>j</sub> ↓ → f<sub>0</sub> ↑</p>
+  <button id="start">Start Lab</button>
+</div></div>
+
+<main>
+<header><div><h1>📻 Varactor Tuner</h1><div class="sub">Did you know a PN junction can help an old-school radio tune into signals?</div></div><span class="badge">90s RADIO • PN JUNCTION • LC TUNING</span></header>
+
+<div class="progress"><div class="progressTop"><span id="missionText">Music Channel</span><span id="scoreText">0 / 3 locked</span></div><div class="bar"><div id="progressBar"></div></div></div>
+
+<section class="game">
+  <div class="card gameMain">
+    <div class="radioFace"><div class="antennaStem"></div><div class="antennaTip"></div><div class="station">NTU RADIO</div>
+    <div class="target" id="target">120.0 MHz</div></div>
+    <div class="targetHint">Turn the knob to adjust V<sub>R</sub> and change the radio channel.</div>
+
+    <div class="junction" aria-label="PN junction diagram">
+      <div class="side p"><div class="charge">P<small>holes +</small></div></div>
+      <div class="region" id="depletion"><div class="charge">W<small>depletion</small></div></div>
+      <div class="side n"><div class="charge">N<small>electrons −</small></div></div>
+    </div>
+
+    <label><b>V<sub>R</sub> knob — turn to adjust radio frequency</b></label>
+    <div class="dialArea">
+      <div class="dial" id="dial" role="slider" aria-label="V R tuning knob" aria-valuemin="0" aria-valuemax="15" aria-valuenow="14" tabindex="0">
+        <div class="dialTicks"></div><div class="dialPointer" id="dialPointer"></div><div class="dialCenter">V<sub>R</sub></div>
+      </div>
+      <div class="touchDot" aria-hidden="true"></div>
+      <div class="dialReadout"><span>CONTROL VOLTAGE</span><strong id="vrValue">14.00 V</strong><small>Turn / drag the knob</small></div>
+    </div>
+    <input id="vr" class="srOnlyRange" type="range" min="0" max="15" step="0.01" value="14" aria-label="V R control voltage">
+
+    <div class="readouts">
+      <div class="readout"><span>Depletion width W</span><b id="w">—</b></div>
+      <div class="readout"><span>Junction capacitance C<sub>j</sub></span><b id="c">—</b></div>
+      <div class="readout"><span>Reactance X<sub>C</sub></span><b id="xc">—</b></div>
+    </div>
+    <div class="freqBox"><div class="small">LIVE RESONANT FREQUENCY</div><div class="freq" id="freq">—</div><div class="status" id="status">Adjust the voltage.</div></div>
+    <div class="actions"><button id="lock">🔒 Lock NTU Radio</button></div>
+  </div>
+
+  <aside class="card sidePanel">
+    <span class="badge">MISSION BRIEF</span>
+    <h2>Think like the circuit.</h2>
+    <p>The slider is not directly controlling frequency. It changes the junction's physical structure first.</p>
+    <div class="targetCard"><b>Music Channel · 120 MHz</b><span>Find the music station by tuning V<sub>R</sub>.</span></div>
+    <div class="targetCard"><b>News Channel · 169 MHz</b><span>Turn the knob to find the news station.</span></div>
+    <div class="targetCard"><b>Comedy Show · 145 MHz</b><span>Tune again to find the comedy station.</span></div>
+    <div class="note"><b>Radio hint:</b> Higher V<sub>R</sub> makes the junction capacitance smaller, which pushes the resonant frequency higher.</div>
+  </aside>
+</section>
+
+<section class="section">
+  <div class="sectionHead"><div><h2>Live equations</h2><div class="sectionLead">The equations are not just displayed — their variables update as you tune V<sub>R</sub>.</div></div><span class="badge">REAL-TIME MODEL</span></div>
+  <div class="formulaGrid">
+    <div class="formula"><div class="formulaTitle">① Depletion width</div><div class="eq">W <span class="trend" id="trendW">↕</span> = √[2ε<sub>s</sub>(V<sub>bi</sub> + <span class="live" id="eqV">V<sub>R</sub></span>)/(qN)] <span>=</span> <span class="live" id="eqW">—</span></div><div class="meaning">More reverse bias widens the depletion region.</div></div>
+    <div class="formula"><div class="formulaTitle">② Junction capacitance</div><div class="eq">C<sub>j</sub> <span class="trend" id="trendC">↕</span> = ε<sub>s</sub>A / <span class="live" id="eqW2">W</span> <span>=</span> <span class="live" id="eqC">—</span></div><div class="meaning">A wider depletion region means less capacitance.</div></div>
+    <div class="formula"><div class="formulaTitle">③ Capacitive reactance</div><div class="eq">X<sub>C</sub> <span class="trend" id="trendX">↕</span> = 1/(2πfC) <span>=</span> <span class="live" id="eqX">—</span></div><div class="meaning">This is the AC opposition produced by the capacitor at the current frequency.</div></div>
+    <div class="formula"><div class="formulaTitle">④ Resonant frequency</div><div class="eq">f<sub>0</sub> <span class="trend" id="trendF">↕</span> = 1/(2π√LC<sub>j</sub>) <span>=</span> <span class="live" id="eqF">—</span></div><div class="meaning">Because C<sub>j</sub> decreases, the LC resonant frequency rises.</div></div>
+  </div>
+</section>
+
+
+
+<section class="section">
+  <div class="sectionHead"><div><h2>Why is a PN junction a capacitor?</h2><div class="sectionLead">Three ideas are enough to explain the device.</div></div></div>
+  <div class="knowledge">
+    <article><h3>1 · Charges are separated</h3><p>Under reverse bias, mobile carriers move away from the junction, leaving a depleted region with very few mobile carriers.</p></article>
+    <article><h3>2 · The depletion region acts like an insulator</h3><p>The P and N sides contain separated charge, while the depletion region behaves like the dielectric between capacitor plates.</p></article>
+    <article><h3>3 · Voltage changes the capacitance</h3><p>Changing V<sub>R</sub> changes W. Since C is approximately εA/W, the junction becomes a voltage-controlled capacitor.</p></article>
+  </div>
+  <div class="note"><b>Where is this useful? — Radio receivers</b><br>In a tuned radio receiver, the antenna picks up many electromagnetic waves at once. An <b>LC resonant circuit</b> can act as a resonant band-pass filter: signals near its resonant frequency are passed strongly, while signals far from that frequency are suppressed. A varactor gives the receiver an electronic way to move that resonant frequency. Changing V<sub>R</sub> changes C<sub>j</sub>, and therefore changes <b>f<sub>0</sub> = 1/(2π√LC<sub>j</sub>)</b>. So instead of mechanically turning a variable capacitor, the radio can use a voltage to select a different channel. <br><br><b>In simple terms:</b> antenna → many stations → LC filter selects one frequency → varactor voltage moves the selected station.</div>
+</section>
+
+<div class="foot">Illustrative device model for learning. The numerical constants are chosen to make the tuning relationship visible and interactive; they are not measurements of a particular commercial varactor.</div>
+</main>
+
+<script>
+(() => {
+  const targets=[120,169,145];
+  const stageStartVR=[14,1,10];
+  let round=0,running=false,score=0,finished=false;
+  const vr=document.getElementById('vr'),vrValue=document.getElementById('vrValue'),dial=document.getElementById('dial'),dialPointer=document.getElementById('dialPointer');
+  const wEl=document.getElementById('w'),cEl=document.getElementById('c'),xcEl=document.getElementById('xc');
+  const freqEl=document.getElementById('freq'),statusEl=document.getElementById('status');
+  const depletion=document.getElementById('depletion'),targetEl=document.getElementById('target');
+  const accuracyBar=document.getElementById('progressBar'),missionText=document.getElementById('missionText'),scoreText=document.getElementById('scoreText');
+  const overlay=document.getElementById('overlay');
+  const eqV=document.getElementById('eqV'),eqW=document.getElementById('eqW'),eqW2=document.getElementById('eqW2'),eqC=document.getElementById('eqC'),eqX=document.getElementById('eqX'),eqF=document.getElementById('eqF');
+  const trendW=document.getElementById('trendW'),trendC=document.getElementById('trendC'),trendX=document.getElementById('trendX'),trendF=document.getElementById('trendF');
+  let lastDirection=0, lastV=parseFloat(vr.value);
+  let prevVals=null;
+  let trendDirs={W:0,C:0,X:0,F:0};
+  function setTrend(el,dir){el.textContent=dir>0?'↑':dir<0?'↓':'↕';el.classList.toggle('down',dir<0);}
+  function updateTrends(x){
+    if(prevVals){
+      if(x.W>prevVals.W) trendDirs.W=1; else if(x.W<prevVals.W) trendDirs.W=-1;
+      if(x.C>prevVals.C) trendDirs.C=1; else if(x.C<prevVals.C) trendDirs.C=-1;
+      if(x.xc>prevVals.X) trendDirs.X=1; else if(x.xc<prevVals.X) trendDirs.X=-1;
+      if(x.f>prevVals.F) trendDirs.F=1; else if(x.f<prevVals.F) trendDirs.F=-1;
+    }
+    prevVals={W:x.W,C:x.C,X:x.xc,F:x.f};
+  }
+
+  // Illustrative silicon-like parameters. They are chosen for a clear educational tuning range.
+  const eps=11.8*8.854e-12,q=1.602e-19,N=1.0e22,Vbi=0.70,A=1.0e-8,L=1.0e-6;
+
+  function calc(){
+    const V=Math.max(0,Math.min(15,parseFloat(vr.value)||0));
+    const W=Math.sqrt(2*eps*(Vbi+V)/(q*N));
+    const C=eps*A/W;
+    const fHz=1/(2*Math.PI*Math.sqrt(L*C));
+    const f=fHz/1e6;
+    const xc=1/(2*Math.PI*fHz*C);
+    return {V,W,C,f,fHz,xc,target:targets[round]};
+  }
+  function render(){
+    const x=calc(),err=Math.abs(x.f-x.target)/x.target;
+    vr.value=x.V.toFixed(2);vrValue.textContent=x.V.toFixed(2)+' V';
+    wEl.textContent=(x.W*1e6).toFixed(2)+' μm';cEl.textContent=(x.C*1e12).toFixed(2)+' pF';xcEl.textContent=Math.round(x.xc)+' Ω';freqEl.textContent=x.f.toFixed(1)+' MHz';targetEl.textContent=x.target.toFixed(1)+' MHz';
+    missionText.textContent=['Music Channel','News Channel','Comedy Show'][round];scoreText.textContent=score+' / 3 locked';accuracyBar.style.width=((score+(1-Math.min(1,err/0.08)))/3*100).toFixed(1)+'%';
+    const width=Math.max(55,Math.min(180,42+x.W*1e6*31));depletion.style.width=width+'px'; const angle=-135+(x.V/15)*270; dialPointer.style.transform='translate(-50%,-100%) rotate('+angle+'deg)'; dial.setAttribute('aria-valuenow',x.V.toFixed(2));
+    eqV.textContent=x.V.toFixed(2)+' V';eqW.textContent=(x.W*1e6).toFixed(2)+' μm';eqW2.textContent=(x.W*1e6).toFixed(2)+' μm';eqC.textContent=(x.C*1e12).toFixed(2)+' pF';eqX.textContent=Math.round(x.xc)+' Ω';eqF.textContent=x.f.toFixed(2)+' MHz';
+    updateTrends(x);
+    setTrend(trendW,trendDirs.W);setTrend(trendC,trendDirs.C);setTrend(trendX,trendDirs.X);setTrend(trendF,trendDirs.F);
+    if(finished){statusEl.innerHTML='<strong>All three stations tuned — keep exploring!</strong>';statusEl.style.color='var(--good)'}
+    else if(err<0.01){statusEl.textContent='🎯 Signal locked!';statusEl.style.color='var(--good)'}
+    else if(err<0.025){statusEl.textContent='Very close… fine-tune!';statusEl.style.color='var(--gold)'}
+    else {statusEl.textContent=x.f<x.target?'Frequency too low → increase Vᵣ':'Frequency too high → decrease Vᵣ';statusEl.style.color='var(--bad)'}
+  }
+  function finish(){
+    running=true;finished=true;scoreText.textContent='3 / 3 locked';statusEl.innerHTML='<strong>All three stations tuned — keep exploring!</strong>';statusEl.style.color='var(--good)';
+  }
+  document.getElementById('start').addEventListener('click',()=>{overlay.style.display='none';running=true;render()});
+  vr.addEventListener('input',()=>{const now=parseFloat(vr.value);if(now>lastV)lastDirection=1;else if(now<lastV)lastDirection=-1;lastV=now;render();});
+  function setFromDial(clientX,clientY){const r=dial.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2;let a=Math.atan2(clientY-cy,clientX-cx)*180/Math.PI+90;if(a<0)a+=360;let norm=(a+135)%360;if(norm>270)return;let v=Math.max(0,Math.min(15,norm/270*15));vr.value=v.toFixed(2);const now=v;if(now>lastV)lastDirection=1;else if(now<lastV)lastDirection=-1;lastV=now;render();}
+  let dialDrag=false;
+  dial.addEventListener('pointerdown',e=>{dialDrag=true;dial.setPointerCapture(e.pointerId);setFromDial(e.clientX,e.clientY);});
+  dial.addEventListener('pointermove',e=>{if(dialDrag)setFromDial(e.clientX,e.clientY);});
+  dial.addEventListener('pointerup',()=>dialDrag=false);
+  dial.addEventListener('pointercancel',()=>dialDrag=false);
+  dial.addEventListener('keydown',e=>{let v=parseFloat(vr.value);if(e.key==='ArrowUp'||e.key==='ArrowRight')v+=.25;else if(e.key==='ArrowDown'||e.key==='ArrowLeft')v-=.25;else return;e.preventDefault();v=Math.max(0,Math.min(15,v));vr.value=v.toFixed(2);lastDirection=v>lastV?1:-1;lastV=v;render();});
+  document.getElementById('lock').addEventListener('click',()=>{
+    if(!running)return;const x=calc(),err=Math.abs(x.f-x.target)/x.target;
+    if(err<0.01){score++;if(round<2){round++;vr.value=stageStartVR[round];lastV=parseFloat(vr.value);lastDirection=0;prevVals=null;trendDirs={W:0,C:0,X:0,F:0};render()}else finish()}else{statusEl.textContent='Not locked — get closer to the target.';statusEl.style.color='var(--bad)'}
+  });
+  vr.value=stageStartVR[0];lastV=parseFloat(vr.value);lastDirection=0;prevVals=null;trendDirs={W:0,C:0,X:0,F:0};render();
+})();
+</script>
+</body>
+</html>
